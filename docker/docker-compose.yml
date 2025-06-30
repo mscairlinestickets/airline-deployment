@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+
+  ticket-service:
+    image: "ticket-service"
+    container_name: "ticket-service"
+    depends_on:
+      - airline-postgres
+    ports:
+      - "9001:9001"
+      - "8001:8001"
+    environment:
+      - BPL_JVM_THREAD_COUNT=50
+      - BPL_DEBUG_ENABLED=true
+      - BPL_DEBUG_PORT=8001
+      - JAVA_TOOL_OPTIONS=-javaagent:/workspace/BOOT-INF/lib/opentelemetry-javaagent-1.33.3.jar
+      - OTEL_SERVICE_NAME=ticket-service
+      - OTEL_METRICS_EXPORTER=none
+      - SPRING_PROFILES_ACTIVE=test
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://airline-postgres:5432/airlinedb_ticket
+    networks:
+      airline-network:
+
+  airline-postgres:
+    image: "postgres:14.12"
+    container_name: "airline-postgres"
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - ./postgresql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      airline-network:
+
+networks:
+  airline-network:
