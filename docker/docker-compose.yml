@@ -22,6 +22,28 @@ services:
     networks:
       airline-network:
 
+  booking-service:
+    image: "booking-service"
+    container_name: "booking-service"
+    depends_on:
+      - airline-postgres
+    ports:
+      - "9002:9002"
+      - "8002:8002"
+    environment:
+      - BPL_JVM_THREAD_COUNT=50
+      - BPL_DEBUG_ENABLED=true
+      - BPL_DEBUG_PORT=8002
+      - JAVA_TOOL_OPTIONS=-javaagent:/workspace/BOOT-INF/lib/opentelemetry-javaagent-1.33.3.jar
+      - OTEL_METRICS_EXPORTER=none
+      - SPRING_R2DBC_URL=r2dbc:postgresql://airline-postgres:5432/airlinedb_booking
+      - SPRING_R2DBC_USERNAME=user
+      - SPRING_R2DBC_PASSWORD=password
+      - SPRING_FLYWAY_URL=jdbc:postgresql://airline-postgres:5432/airlinedb_booking
+      - TICKET_CATALOG_FLIGHT_URI=http://ticket-service:9001
+    networks:
+      airline-network:
+
   airline-postgres:
     image: "postgres:14.12"
     container_name: "airline-postgres"
@@ -34,6 +56,36 @@ services:
       - ./postgresql/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       airline-network:
+
+  zookeeper:
+    image: docker.io/bitnami/zookeeper:3
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+
+  kafka-airlines:
+    image: docker.io/bitnami/kafka:latest
+    container_name: "kafka-airlines"
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092
+      - KAFKA_CFG_NUM_PARTITIONS=3
+      - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=3
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=3
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=2
+      - KAFKA_CFG_DEFAULT_REPLICATION_FACTOR=3
+      - KAFKA_CFG_ACKS=all
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    depends_on:
+      - zookeeper
 
 networks:
   airline-network:
