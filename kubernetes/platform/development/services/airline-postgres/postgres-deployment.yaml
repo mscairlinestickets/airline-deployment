@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  labels:
+    db: airline-postgres
+data:
+  init.sql: |
+    CREATE DATABASE airlinedb_ticket;
+    CREATE DATABASE airlinedb_booking;
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airline-postgres
+  labels:
+    db: airline-postgres
+spec:
+  selector:
+    matchLabels:
+      db: airline-postgres
+  template:
+    metadata:
+      labels:
+        db: airline-postgres
+    spec:
+      containers:
+        - name: airline-postgres
+          image: postgres:14.12
+          envFrom:
+            - configMapRef:
+                name: airline-postgres-configmap
+          resources:
+            requests:
+              cpu: 100m
+              memory: 60Mi
+            limits:
+              cpu: 200m
+              memory: 120Mi
+          volumeMounts:
+            - mountPath: /docker-entrypoint-initdb.d
+              name: postgres-config-volume
+      volumes:
+        - name: postgres-config-volume
+          configMap:
+            name: postgres-config
+
