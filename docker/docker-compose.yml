@@ -41,6 +41,7 @@ services:
       - SPRING_R2DBC_PASSWORD=password
       - SPRING_FLYWAY_URL=jdbc:postgresql://airline-postgres:5432/airlinedb_booking
       - TICKET_CATALOG_FLIGHT_URI=http://ticket-service:9001
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka-airlines:9092
     networks:
       airline-network:
 
@@ -64,28 +65,61 @@ services:
       - "2181:2181"
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
+    networks:
+      airline-network:
 
   kafka-airlines:
-    image: docker.io/bitnami/kafka:latest
+    image: wurstmeister/kafka
     container_name: "kafka-airlines"
     ports:
       - "9092:9092"
       - "29092:29092"
     environment:
-      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
-      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092
-      - KAFKA_CFG_NUM_PARTITIONS=3
-      - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=3
-      - KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=3
-      - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=2
-      - KAFKA_CFG_DEFAULT_REPLICATION_FACTOR=3
-      - KAFKA_CFG_ACKS=all
-      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka-airlines:9092,PLAINTEXT_HOST://localhost:29092
+      - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092
+      - KAFKA_CREATE_TOPICS=booking-accepted:3:1
       - ALLOW_PLAINTEXT_LISTENER=yes
     depends_on:
       - zookeeper
+    networks:
+      airline-network:
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "9080:8080"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=kafka-airlines
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka-airlines:9092
+      - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper:2181
+    depends_on:
+      - kafka-airlines
+      - zookeeper
+    networks:
+      airline-network:
+
+  fluent-bit:
+    image: grafana/fluent-bit-plugin-loki:2.9.8
+    container_name: "fluent-bit"
+    ports:
+      - "2424:2424"
+    environment:
+      - LOKI_URL=http://loki:3100/loki/api/v1/push
+    networks:
+      airline-network:
+
+  tempo:
+    image: grafana/tempo:2.5.0
+    container_name: tempo
+    ports:
+      - "3110:3100"     # Tempo
+      - "4317:4317"     # OTel
+    networks:
+      airline-network:
+
 
 networks:
   airline-network:

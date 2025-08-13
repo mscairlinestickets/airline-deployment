@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-airlines
+  labels:
+    bk: kafka-airlines
+spec:
+  type: ClusterIP
+  selector:
+    bk: kafka-airlines
+  ports:
+    - protocol: TCP
+      port: 9092
+      name: internal
+    - port: 29092
+      name: external
