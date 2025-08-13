@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - https://github.com/mscairlinestickets/ticket-service/k8s?ref=main
+
+patchesStrategicMerge:
+
+configMapGenerator:
+  - behavior: merge
+    files:
+      - application-staging.yaml
+    name: ticket-config
+
+images:
+  - name: ticket-service
+    newName: ghcr.io/mscairlinestickets/ticket-service
+    newTag: latest
+
+replicas:
+  - name: ticket-service
+    count: 2

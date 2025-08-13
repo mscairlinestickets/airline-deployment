@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-airlines
+spec:
+  selector:
+    matchLabels:
+      bk: kafka-airlines
+  template:
+    metadata:
+      labels:
+        bk: kafka-airlines
+    spec:
+      containers:
+        - name: kafka-container
+          image: wurstmeister/kafka
+          ports:
+            - containerPort: 9092
+            - containerPort: 29092
+          envFrom:
+            - configMapRef:
+                name: kafka-envs
