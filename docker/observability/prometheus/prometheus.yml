@@ -1,0 +1,14 @@
+global:
+  scrape_interval: 2s
+
+scrape_configs:
+  - job_name: 'ticket-service'
+    scrape_interval: 2s
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'ticket-service:9001' ]
+  - job_name: 'booking-service'
+    scrape_interval: 2s
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'booking-service:9002' ]
