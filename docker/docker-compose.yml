@@ -16,11 +16,16 @@ services:
       - BPL_DEBUG_PORT=8001
       - JAVA_TOOL_OPTIONS=-javaagent:/workspace/BOOT-INF/lib/opentelemetry-javaagent-1.33.3.jar
       - OTEL_SERVICE_NAME=ticket-service
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
       - OTEL_METRICS_EXPORTER=none
       - SPRING_PROFILES_ACTIVE=test
       - SPRING_DATASOURCE_URL=jdbc:postgresql://airline-postgres:5432/airlinedb_ticket
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: 127.0.0.1:24224
     networks:
-      airline-network:
+      - airline-network
 
   booking-service:
     image: "booking-service"
@@ -35,6 +40,8 @@ services:
       - BPL_DEBUG_ENABLED=true
       - BPL_DEBUG_PORT=8002
       - JAVA_TOOL_OPTIONS=-javaagent:/workspace/BOOT-INF/lib/opentelemetry-javaagent-1.33.3.jar
+      - OTEL_SERVICE_NAME=booking-service
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
       - OTEL_METRICS_EXPORTER=none
       - SPRING_R2DBC_URL=r2dbc:postgresql://airline-postgres:5432/airlinedb_booking
       - SPRING_R2DBC_USERNAME=user
@@ -42,8 +49,12 @@ services:
       - SPRING_FLYWAY_URL=jdbc:postgresql://airline-postgres:5432/airlinedb_booking
       - TICKET_CATALOG_FLIGHT_URI=http://ticket-service:9001
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka-airlines:9092
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: 127.0.0.1:24224
     networks:
-      airline-network:
+      - airline-network
 
   airline-postgres:
     image: "postgres:14.12"
@@ -56,7 +67,7 @@ services:
     volumes:
       - ./postgresql/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
-      airline-network:
+      - airline-network
 
   zookeeper:
     image: docker.io/bitnami/zookeeper:3
@@ -66,7 +77,7 @@ services:
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
     networks:
-      airline-network:
+      - airline-network
 
   kafka-airlines:
     image: wurstmeister/kafka
@@ -84,7 +95,7 @@ services:
     depends_on:
       - zookeeper
     networks:
-      airline-network:
+      - airline-network
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
@@ -99,27 +110,69 @@ services:
       - kafka-airlines
       - zookeeper
     networks:
-      airline-network:
+      - airline-network
+
+  grafana:
+    image: grafana/grafana-oss:10.4.3
+    container_name: grafana
+    depends_on:
+      - loki
+      - tempo
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=user
+      - GF_SECURITY_ADMIN_PASSWORD=password
+    volumes:
+      - ./observability/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./observability/grafana/datasources:/etc/grafana/provisioning/datasources
+      - ./observability/grafana/grafana.init:/etc/grafana/grafana.init
+    networks:
+      - airline-network
+
+  loki:
+    image: grafana/loki:2.9.8
+    container_name: "loki"
+    depends_on:
+      - fluent-bit
+    ports:
+      - "3100:3100"
+    networks:
+      - airline-network
 
   fluent-bit:
     image: grafana/fluent-bit-plugin-loki:2.9.8
     container_name: "fluent-bit"
     ports:
-      - "2424:2424"
+      - "24224:24224"
     environment:
       - LOKI_URL=http://loki:3100/loki/api/v1/push
+    volumes:
+      - ./observability/fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
     networks:
-      airline-network:
+      - airline-network
 
   tempo:
     image: grafana/tempo:2.5.0
     container_name: tempo
+    command: --config.file=/etc/tempo-config.yml
     ports:
       - "3110:3100"     # Tempo
       - "4317:4317"     # OTel
+    volumes:
+      - ./observability/tempo/tempo.yml:/etc/tempo-config.yml
     networks:
-      airline-network:
+      - airline-network
 
+  prometheus:
+    image: quay.io/prometheus/prometheus:v2.52.0
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - airline-network
 
 networks:
   airline-network:
