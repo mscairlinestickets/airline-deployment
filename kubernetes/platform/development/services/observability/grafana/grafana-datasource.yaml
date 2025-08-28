@@ -1,0 +1,84 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasources-config
+  labels:
+    app: grafana
+data:
+  datasources.yml: | # Este nome de chave deve corresponder ao caminho final no contêiner
+    apiVersion: 1
+    datasources:
+    - name: Prometheus
+      type: prometheus
+      uid: prometheus-erick-silva
+      access: proxy
+      orgId: 1
+      url: http://prometheus:9090
+      basicAuth: false
+      isDefault: false
+      version: 1
+      editable: true
+    - name: Tempo
+      type: tempo
+      uid: tempo-erick-silva
+      access: proxy
+      orgId: 1
+      url: http://tempo:3100
+      basicAuth: false
+      isDefault: false
+      version: 1
+      editable: true
+      jsonData:
+        httpMethod: GET
+        tracesToLogs:
+          datasourceUid: 'loki-erick-silva'
+          tags: [ 'instance', 'pod', 'namespace', 'hostname' ]
+          mappedTags: [ { key: 'service.name', value: 'application' }  ]
+          mapTagNamesEnabled: true
+          spanStartTimeShift: '1h'
+          spanEndTimeShift: '1h'
+          filterByTraceID: true
+          filterBySpanID: false
+          lokiSearch: true
+        lokiSearch:
+          datasourceUid: 'loki-erick-silva'
+        serviceMap:
+          datasourceUid: 'prometheus-erick-silva'
+        search:
+          hide: false
+        nodeGraph:
+          enabled: true
+    - name: Loki
+      type: loki
+      uid: loki-erick-silva
+      access: proxy
+      orgId: 1
+      url: http://loki:3100
+      basicAuth: false
+      isDefault: true
+      version: 1
+      editable: true
+      jsonData:
+        derivedFields:
+          - datasourceUid: tempo-erick-silva
+            matcherRegex: \[[^,]+,([a-f0-9]{32}),
+            name: TraceID
+            url: $${__value.raw}
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-ini-config
+  labels:
+    app: grafana
+data:
+  grafana.ini: |
+    [server]
+    http_port = 3000
+    [paths]
+    data = /var/lib/grafana
+    logs = /var/log/grafana
+    plugins = /var/lib/grafana/plugins
+    provisioning = /etc/grafana/provisioning
