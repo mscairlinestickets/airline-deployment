@@ -1,12 +1,41 @@
 version: "3.9"
 
 services:
+  # Applications
+  auth-service:
+    depends_on:
+      - airline-postgres
+      - fluent-bit
+      - tempo
+    image: "auth-service"
+    container_name: "auth-service"
+    ports:
+      - "9005:9005"
+      - "8005:8005"
+    environment:
+      - BPL_JVM_THREAD_COUNT=50
+      - BPL_DEBUG_ENABLED=true
+      - BPL_DEBUG_PORT=8005
+      - JAVA_TOOL_OPTIONS=-javaagent:/workspace/BOOT-INF/lib/opentelemetry-javaagent-1.33.3.jar
+      - OTEL_SERVICE_NAME=auth-service
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
+      - OTEL_METRICS_EXPORTER=none
+      - SPRING_PROFILES_ACTIVE=test
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://airline-postgres:5432/airlinedb_security
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: 127.0.0.1:24224
+    networks:
+      - airline-network
 
   ticket-service:
     image: "ticket-service"
     container_name: "ticket-service"
     depends_on:
       - airline-postgres
+      - fluent-bit
+      - tempo
     ports:
       - "9001:9001"
       - "8001:8001"
@@ -20,6 +49,8 @@ services:
       - OTEL_METRICS_EXPORTER=none
       - SPRING_PROFILES_ACTIVE=test
       - SPRING_DATASOURCE_URL=jdbc:postgresql://airline-postgres:5432/airlinedb_ticket
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI=http://auth-service:9005/api/auth/.well-known/jwks.json
+
     logging:
       driver: fluentd
       options:
@@ -32,6 +63,9 @@ services:
     container_name: "booking-service"
     depends_on:
       - airline-postgres
+      - fluent-bit
+      - tempo
+      - kafka-airlines
     ports:
       - "9002:9002"
       - "8002:8002"
@@ -56,6 +90,36 @@ services:
     networks:
       - airline-network
 
+  edge-service:
+    image: "edge-service-airline"
+    container_name: "edge-service"
+    depends_on:
+      - airline-redis
+      - fluent-bit
+      - tempo
+    environment:
+      - BPL_DEBUG_ENABLED=true
+      - BPL_DEBUG_PORT=8000
+      - JAVA_TOOL_OPTIONS=-javaagent:/workspace/BOOT-INF/lib/opentelemetry-javaagent-1.33.3.jar
+      - OTEL_SERVICE_NAME=edge-service
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
+      - OTEL_METRICS_EXPORTER=none
+      - TICKET_SERVICE_URL=http://ticket-service:9001
+      - AUTH_SERVICE_URL=http://auth-service:9005
+      - BOOKING_SERVICE_URL=http://booking-service:9003
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI=http://auth-service:9005/api/auth/.well-known/jwks.json
+      - REDIS_AIRLINE_URL=airline-redis
+    ports:
+      - "9000:9000"
+      - "8000:8000"
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: 127.0.0.1:24224
+    networks:
+      - airline-network
+
+  # Infrastructure backing service
   airline-postgres:
     image: "postgres:14.12"
     container_name: "airline-postgres"
@@ -112,12 +176,22 @@ services:
     networks:
       - airline-network
 
+  airline-redis:
+    image: "redis:7.2"
+    container_name: "airline-redis"
+    ports:
+      - "6379:6379"
+    networks:
+      - airline-network
+
+  # Observability
   grafana:
     image: grafana/grafana-oss:10.4.3
     container_name: grafana
     depends_on:
       - loki
       - tempo
+      - prometheus
     ports:
       - "3000:3000"
     environment:
@@ -173,6 +247,8 @@ services:
       - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
       - airline-network
+
+
 
 networks:
   airline-network:
