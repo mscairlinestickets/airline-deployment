@@ -12,7 +12,7 @@ configMapGenerator:
 
 images:
   - name: booking-service
-    newName: ghcr.io/mscairlinestickets/booking-service
+    newName: 234559571647.dkr.ecr.us-east-1.amazonaws.com/booking-service
     newTag: latest
 
 replicas:

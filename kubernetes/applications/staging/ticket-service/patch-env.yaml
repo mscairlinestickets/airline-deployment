@@ -6,7 +6,7 @@ spec:
   template:
     spec:
       containers:
-        - name: ticket-service
+        - name: ticket-service-container
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: staging
