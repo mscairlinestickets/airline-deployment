@@ -1,14 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
-kind: Application
 metadata:
-  name: booking-service
+  name: msc-airlines-database
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/mscairlinestickets/airline-deployment
     targetRevision: HEAD
-    path: kubernetes/applications/staging/booking-service
+    path: kubernetes/platform/development/services/airline-postgres
   destination:
     server: https://kubernetes.default.svc
     namespace: default
