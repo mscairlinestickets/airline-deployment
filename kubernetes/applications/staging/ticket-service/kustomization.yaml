@@ -14,7 +14,7 @@ configMapGenerator:
 
 images:
   - name: ticket-service
-    newName: ghcr.io/mscairlinestickets/ticket-service
+    newName: 234559571647.dkr.ecr.us-east-1.amazonaws.com/ticket-service:no-security
     newTag: latest
 
 replicas:
