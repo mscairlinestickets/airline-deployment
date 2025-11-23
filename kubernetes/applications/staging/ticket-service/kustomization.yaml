@@ -2,21 +2,20 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - https://github.com/mscairlinestickets/ticket-service/k8s?ref=main
+- https://github.com/mscairlinestickets/ticket-service/k8s?ref=80f2213f1f5b92281106cc1bbbc3ea54c5758a80
 
-patchesStrategicMerge:
 
 configMapGenerator:
-  - behavior: merge
-    files:
-      - application-staging.yaml
-    name: ticket-config
+- behavior: merge
+  files:
+  - application-staging.yaml
+  name: ticket-config
 
 images:
-  - name: ticket-service
-    newName: 234559571647.dkr.ecr.us-east-1.amazonaws.com/ticket-service:no-security
-    newTag: 
+- name: ticket-service
+  newName: 234559571647.dkr.ecr.us-east-1.amazonaws.com/mscairlinestickets/ticket-service
+  newTag: 80f2213f1f5b92281106cc1bbbc3ea54c5758a80
 
 replicas:
-  - name: ticket-service
-    count: 2
+- count: 2
+  name: ticket-service
