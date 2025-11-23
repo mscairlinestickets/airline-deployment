@@ -13,7 +13,7 @@ configMapGenerator:
 
 images:
 - name: ticket-service
-  newName: 234559571647.dkr.ecr.us-east-1.amazonaws.com/mscairlinestickets/ticket-service
+  newName: 234559571647.dkr.ecr.us-east-1.amazonaws.com/ticket-service
   newTag: 80f2213f1f5b92281106cc1bbbc3ea54c5758a80
 
 replicas:
