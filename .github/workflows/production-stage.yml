@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Update image version
         run: |
-          cd kubernetes/applications/${{ env.APP_NAME }}/production
+          cd kubernetes/applications/staging/${APP_NAME}
           kustomize edit set image ${{ env.APP_NAME }}=${{ env.APP_IMAGE }}:${{ env.APP_VERSION }}
           sed -i 's/ref=[\w+]/${{ env.APP_VERSION }}/' kustomization.yml
       - name: Commit updated manifests
