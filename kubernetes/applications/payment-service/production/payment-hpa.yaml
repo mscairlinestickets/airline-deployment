@@ -1,13 +1,13 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: booking-service
+  name: payment-service
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: booking-service
-  maxReplicas: 10
+    name: payment-service
+  maxReplicas: 8
   minReplicas: 2
   metrics:
   - type: Resource

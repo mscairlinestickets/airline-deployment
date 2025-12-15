@@ -8,6 +8,8 @@ data:
   init.sql: |
     CREATE DATABASE airlinedb_ticket;
     CREATE DATABASE airlinedb_booking;
+    CREATE DATABASE airlinedb_security;
+    CREATE DATABASE airlinedb_payment;
 
 ---
 
@@ -42,13 +44,8 @@ spec:
           volumeMounts:
             - mountPath: /docker-entrypoint-initdb.d
               name: postgres-config-volume
-            - mountPath: /var/lib/postgresql/data
-              name: postgres-data
       volumes:
         - name: postgres-config-volume
           configMap:
             name: postgres-config
-        - name: postgres-data
-          persistentVolumeClaim:
-            claimName: postgres-pvc
 

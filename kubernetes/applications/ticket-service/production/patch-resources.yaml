@@ -1,0 +1,14 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ticket-service
+spec:
+  template:
+    spec:
+      containers:
+      - name: ticket-service
+        resources:
+          requests:
+            memory: "756Mi"
+            cpu: "100m"
+          

@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: booking-service
+spec:
+  template:
+    spec:
+      containers:
+        - name: booking-service
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod
+            - name:  TICKET_CATALOG_FLIGHT_URI
+              value: http://ticket-service:9001
+            - name: MESSAGE_TOPIC
+              value: booking-accepted

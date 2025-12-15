@@ -1,15 +1,15 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ticket-service
+  name: edge-service
 spec:
   template:
     spec:
       containers:
-        - name: ticket-service
+        - name: edge-service
           env:
             - name: BPL_JVM_THREAD_COUNT
-              value: "100"
+              value: "200"
             - name: SPRING_PROFILES_ACTIVE
               value: prod
             

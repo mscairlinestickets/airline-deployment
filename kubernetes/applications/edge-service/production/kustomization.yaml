@@ -2,8 +2,9 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - https://github.com/mscairlinestickets/ticket-service/k8s?ref=main
-  - ticket-hpa.yaml
+  - https://github.com/mscairlinestickets/edge-service/k8s?ref=main
+  - edge-hpa.yaml
+
 patchesStrategicMerge:
   - patch-env.yaml
   - patch-resources.yaml
@@ -14,11 +15,9 @@ configMapGenerator:
   - behavior: merge
     files:
       - application-prod.yaml
-    name: ticket-config
+    name: edge-config
 
 images:
-  - name: ticket-service
-    newName: 234559571647.dkr.ecr.us-east-1.amazonaws.com/msc/ticket-service
+  - name: edge-service
+    newName: 234559571647.dkr.ecr.us-east-1.amazonaws.com/msc/edge-service
     newTag: latest
-
-

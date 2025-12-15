@@ -8,11 +8,11 @@ spec:
     kind: Deployment
     name: ticket-service
   maxReplicas: 10
-  minReplicas: 1
+  minReplicas: 2
   metrics:
   - type: Resource
     resource:
       name: cpu
       target:
         type: Utilization
-        averageUtilization: 78
+        averageUtilization: 75

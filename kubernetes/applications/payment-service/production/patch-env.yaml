@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+spec:
+  template:
+    spec:
+      containers:
+        - name: payment-service
+          env:
+            - name: BPL_JVM_THREAD_COUNT
+              value: "100"
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod
+            - name: STRIPE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: payment-gateway-secrets
+                  key: stripe-api-key
+            - name: PAYMENT_WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: payment-gateway-secrets
+                  key: webhook-secret
+            - name: MESSAGE_TOPIC
+              value: payment-processed

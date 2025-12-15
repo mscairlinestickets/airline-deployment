@@ -1,14 +1,14 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: booking-service
+  name: edge-service
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: booking-service
-  maxReplicas: 10
-  minReplicas: 2
+    name: edge-service
+  maxReplicas: 15
+  minReplicas: 3
   metrics:
   - type: Resource
     resource:

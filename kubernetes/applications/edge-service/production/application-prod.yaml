@@ -1,0 +1,25 @@
+spring:
+  gateway:
+    server:
+      webflux:
+        routes:
+          - id: auth-service
+            uri: http://auth-service:9005/api/auth/login
+            predicates:
+              - Path=/api/auth/**
+          - id: ticket-service
+            uri: http://ticket-service:9001/api/flights
+            predicates:
+              - Path=/api/flights/**
+          - id: booking-service
+            uri: http://booking-service:9002/bookings
+            predicates:
+              - Path=/bookings/**
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://auth-service:9005/api/auth/.well-known/jwks.json
+  data:
+    redis:
+      host: airline-redis

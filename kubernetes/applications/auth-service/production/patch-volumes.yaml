@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+spec:
+  template:
+    spec:
+      containers:
+        - name: auth-service
+          volumeMounts:
+            - name: postgres-credentials-volume
+              mountPath: /workspace/secrets/postgres
+            - name: oauth2-authserver-secret-volume
+              mountPath: /workspace/secrets/oauth2-authserver
+      volumes:
+        - name: postgres-credentials-volume
+          secret:
+            secretName: postgres-auth-credentials
+        - name: oauth2-authserver-secret-volume
+          secret:
+            secretName: oauth-authserver-secret
+        

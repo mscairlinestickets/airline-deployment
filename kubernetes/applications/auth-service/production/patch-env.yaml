@@ -1,15 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ticket-service
+  name: auth-service
 spec:
   template:
     spec:
       containers:
-        - name: ticket-service
+        - name: auth-service
           env:
             - name: BPL_JVM_THREAD_COUNT
               value: "100"
             - name: SPRING_PROFILES_ACTIVE
               value: prod
-            
