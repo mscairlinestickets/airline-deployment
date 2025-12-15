@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/mscairlinestickets/airline-deployment
     targetRevision: HEAD
-    path: kubernetes/applications/production/auth-service
+    path: kubernetes/applications/auth-service/production
   destination:
     server: https://kubernetes.default.svc
     namespace: default
