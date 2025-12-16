@@ -17,7 +17,11 @@ spring:
             uri: http://booking-service/bookings
             predicates:
               - Path=/bookings/**
-
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://auth-service/api/auth/.well-known/jwks.json
   data:
     redis:
       host: airline-redis
