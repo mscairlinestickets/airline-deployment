@@ -1,6 +1,6 @@
 spring:
   config:
-    import: configtree:/workspace/secrets/*/spring:
+    import: configtree:/workspace/secrets/*/
   gateway:
     server:
       webflux:
