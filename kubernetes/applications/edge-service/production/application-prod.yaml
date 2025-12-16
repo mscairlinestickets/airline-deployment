@@ -6,15 +6,15 @@ spring:
       webflux:
         routes:
           - id: auth-service
-            uri: http://auth-service/api/auth/login
+            uri: http://auth-service
             predicates:
               - Path=/api/auth/**
           - id: ticket-service
-            uri: http://ticket-service/api/flights
+            uri: http://ticket-service
             predicates:
               - Path=/api/flights/**
           - id: booking-service
-            uri: http://booking-service/bookings
+            uri: http://booking-service
             predicates:
               - Path=/bookings/**
   security:
@@ -25,3 +25,4 @@ spring:
   data:
     redis:
       host: airline-redis
+
