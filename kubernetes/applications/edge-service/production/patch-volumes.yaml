@@ -10,7 +10,12 @@ spec:
           volumeMounts:
             - name: oauth2-resourceserver-secret-volume
               mountPath: /workspace/secrets/oauth2-resourceserver
+            - name: airline-redis-secret-volume
+              mountPath: /workspace/secrets/oauth2-resourceserver
       volumes:
         - name: oauth2-resourceserver-secret-volume
           secret:
             secretName: oauth-resourceserver-secret
+        - name: airline-redis-secret-volume
+          secret:
+            secretName: airline-redis-secret
