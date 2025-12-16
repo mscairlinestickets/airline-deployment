@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: configtree:/workspace/secrets/*/spring:
   gateway:
     server:
       webflux:
@@ -16,6 +18,6 @@ spring:
             predicates:
               - Path=/bookings/**
 
-data:
-  redis:
-    host: airline-redis
+  data:
+    redis:
+      host: airline-redis
