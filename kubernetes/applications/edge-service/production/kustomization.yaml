@@ -20,4 +20,4 @@ configMapGenerator:
 images:
 - name: edge-service
   newName: 234559571647.dkr.ecr.us-east-1.amazonaws.com/msc/edge-service
-  newTag: f745a41f739f6eaab7a5cb5b1202f02bc5a299ae
+  newTag: ccaff174e898457e2d27d74a0f05686e355c10ae
