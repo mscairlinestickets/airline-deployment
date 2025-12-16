@@ -3,22 +3,22 @@ kind: Kustomization
 
 
 resources:
-  - https://github.com/mscairlinestickets/auth-service/k8s?ref=main
-  - auth-hpa.yaml
+- https://github.com/mscairlinestickets/auth-service/k8s?ref=main
+- auth-hpa.yaml
 
 patchesStrategicMerge:
-  - patch-env.yaml
-  - patch-resources.yaml
-  - patch-volumes.yaml
-  - patch-tracing.yaml
+- patch-env.yaml
+- patch-resources.yaml
+- patch-volumes.yaml
+- patch-tracing.yaml
 
 configMapGenerator:
-  - behavior: merge
-    files:
-      - application-prod.yaml
-    name: auth-config
+- behavior: merge
+  files:
+  - application-prod.yaml
+  name: auth-config
 
 images:
-  - name: auth-service
-    newName: 234559571647.dkr.ecr.us-east-1.amazonaws.com/msc/auth-service
-    newTag: latest
+- name: auth-service
+  newName: 234559571647.dkr.ecr.us-east-1.amazonaws.com/msc/auth-service
+  newTag: f21512548ba2a07291d18cc4eee5795e13deb7b7
