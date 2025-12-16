@@ -2,22 +2,22 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - https://github.com/mscairlinestickets/edge-service/k8s?ref=main
-  - edge-hpa.yaml
+- https://github.com/mscairlinestickets/edge-service/k8s?ref=main
+- edge-hpa.yaml
 
 patchesStrategicMerge:
-  - patch-env.yaml
-  - patch-resources.yaml
-  - patch-volumes.yaml
-  - patch-tracing.yaml
+- patch-env.yaml
+- patch-resources.yaml
+- patch-volumes.yaml
+- patch-tracing.yaml
 
 configMapGenerator:
-  - behavior: merge
-    files:
-      - application-prod.yaml
-    name: edge-config
+- behavior: merge
+  files:
+  - application-prod.yaml
+  name: edge-config
 
 images:
-  - name: edge-service
-    newName: 234559571647.dkr.ecr.us-east-1.amazonaws.com/msc/edge-service
-    newTag: latest
+- name: edge-service
+  newName: 234559571647.dkr.ecr.us-east-1.amazonaws.com/msc/edge-service
+  newTag: 9534d1a2fb5e07cdd32e118b91d8dee6c97e0d05
